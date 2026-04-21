@@ -1,0 +1,75 @@
+@startuml
+entity Clientes {
+    id_cliente : INT (PK)
+    --
+    nombre: VARCHAR(100)
+    --
+    email : VARCHAR(150)
+    --
+    fecha_registro : DATE
+}
+
+entity Freelancers {
+    id_reg: INT (PK)
+    --
+    freelancer_nombre: VARCHAR(100)
+    --
+    especialidad: VARCHAR(100)
+    --
+    tarifa_hora: DECIMAL
+    --
+    fecha_registro: DATE
+}
+
+entity Proyectos {
+    id_proyecto: INT (PK)
+    --
+    id_cliente: INT (FK)
+    --
+    proyecto_titulo: VARCHAR(200)
+    --
+    descripcion: TEXT
+    --
+    proyecto_presupuesto: DECIMAL
+    --
+    fecha_limite: DATE
+}
+
+entity Postulaciones {
+    id_postulacion: INT (PK)
+    --
+    id_proyecto: INT (FK)
+    --
+    id_reg: INT (FK)
+    --
+    postulacion_monto: DECIMAL
+    --
+    postulacion_mensaje: TEXT
+    --
+    fecha_postulacion: DATE
+}
+
+entity Asignaciones {
+    id_asignacion: INT (PK)
+    --
+    id_postulacion: INT (FK)
+    --
+    asignacion_fecha: DATE
+}
+
+entity Pagos {
+    id_pago: INT (PK)
+    --
+    id_proyecto: INT (FK)
+    --
+    pago_monto: DECIMAL
+    --
+    pago_fecha: DATE
+}
+
+Clientes      ||--o{ Proyectos
+Proyectos     ||--o{ Postulaciones
+Freelancers   ||--o{ Postulaciones
+Postulaciones ||--|| Asignaciones
+Proyectos     ||--o{ Pagos
+@enduml
