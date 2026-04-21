@@ -1,88 +1,82 @@
 # Proyecto-sql
+
+## Descripción general
+FreelanceHub es una base de datos relacional pensada para gestionar una plataforma de trabajo independiente. El modelo organiza la información de clientes, freelancers, proyectos, postulaciones, asignaciones y pagos, permitiendo representar el ciclo completo de un proyecto: desde su publicación hasta su pago parcial o total.
+
 ## Explicación del modelo de datos
+El modelo está compuesto por seis tablas principales:
 
-El sistema está diseñado para gestionar la relación entre clientes, proyectos y freelancers dentro de una plataforma de contratación.
+- **clientes**: almacena los datos de quienes publican proyectos.
+- **freelancers**: registra a los profesionales disponibles, su especialidad y su tarifa por hora.
+- **proyectos**: contiene los proyectos publicados por cada cliente.
+- **postulaciones**: representa las ofertas que hacen los freelancers sobre un proyecto.
+- **asignaciones**: indica qué postulación fue seleccionada para trabajar en un proyecto.
+- **pagos**: guarda los pagos asociados a cada proyecto, permitiendo pagos parciales.
 
-Entidades principales
-Clientes
-Almacena la información de los clientes que publican proyectos.
-Relación: un cliente puede tener múltiples proyectos.
-Freelancers
-Contiene los profesionales disponibles.
-Incluye especialidad y tarifa por hora.
-Proyectos
-Representa los trabajos publicados por los clientes.
-Relación:
-Pertenece a un cliente.
-Puede tener múltiples postulaciones.
-Puede tener múltiples pagos.
-Postulaciones
-Representa las ofertas de freelancers a proyectos.
-Relación:
-Un freelancer puede postularse a varios proyectos.
-Un proyecto puede recibir múltiples postulaciones.
-Asignaciones
-Representa la selección de una postulacion ganadora.
-Relación:
-Cada asignación corresponde a una única postulación (relación 1 a 1).
-Pagos
-Registra los pagos realizados por proyecto.
-Relación:
-Un proyecto puede tener múltiples pagos.
-Relaciones clave
-Cliente → Proyectos (1:N)
-Proyecto → Postulaciones (1:N)
-Freelancer → Postulaciones (1:N)
-Postulación → Asignación (1:1)
-Proyecto → Pagos (1:N)
- Decisiones de diseño tomadas
-Normalización
-El modelo está normalizado para evitar redundancia (hasta 3FN).
-Separación clara entre entidades como postulaciones y asignaciones.
-Uso de claves foráneas
-Se implementaron para mantener integridad referencial entre tablas.
-Separación de postulaciones y asignaciones
-Permite mantener historial de ofertas incluso si no fueron seleccionadas.
-Pagos independientes
-Permite registrar múltiples pagos por proyecto (útil para pagos parciales o por hitos).
-Flexibilidad del sistema
-Se puede escalar fácilmente para incluir estados (pendiente, completado, etc.) sin romper la estructura.
- Instrucciones para ejecutar los scripts
-Orden de ejecución
+Relaciones principales:
 
-Ejecutar el esquema de la base de datos:
+- Un **cliente** puede tener muchos **proyectos**.
+- Un **proyecto** puede tener muchas **postulaciones**.
+- Un **freelancer** puede realizar muchas **postulaciones**.
+- Una **postulación** puede tener una sola **asignación**.
+- Un **proyecto** puede tener muchos **pagos**.
 
-schema.sql
+## Decisiones de diseño tomadas
+Se tomaron las siguientes decisiones para mantener el modelo simple, flexible y útil para reportes:
 
-Insertar los datos iniciales:
+- La tabla **asignaciones** se relaciona con **postulaciones** y no directamente con freelancers, porque la asignación real surge de una propuesta específica hecha sobre un proyecto.
+- La tabla **pagos** se vincula directamente con **proyectos**, ya que un mismo proyecto puede recibir varios pagos parciales.
+- Se permitieron campos **NULL** en algunos atributos como fecha límite, monto de pago o fecha de pago para reflejar escenarios reales con información incompleta o procesos aún en curso.
+- Se definieron restricciones de integridad como claves primarias, claves foráneas, unicidad en el correo de clientes y validaciones de montos mayores a cero.
+- Se utilizó una estructura compatible con consultas de análisis, especialmente para comparar postulaciones, detectar freelancers no asignados y revisar pagos incompletos.
 
-inserts.sql
+## Instrucciones para ejecutar los scripts
+Para cargar la base de datos se recomienda ejecutar los archivos en este orden:
 
-Ejecutar las consultas/reportes:
+1. **schema.sql**: crea todas las tablas y sus relaciones.
+2. **inserts.sql**: inserta los datos de prueba y los registros adicionales.
+3. **reportes.sql**: ejecuta las consultas de análisis y reporte.
 
-reportes.sql
-Requisitos
-Motor de base de datos compatible con SQL (MySQL, PostgreSQL, etc.)
-Tener permisos para crear tablas e insertar datos
-Uso de LEFT JOIN y subconsultas
+### Pasos sugeridos en MySQL
+1. Abrir MySQL Workbench, phpMyAdmin o una consola MySQL.
+2. Crear una base de datos nueva, por ejemplo:
 
-Se cumplió con el requisito del uso de LEFT JOIN y subconsultas de la siguiente forma:
+```sql
+CREATE DATABASE FreelanceHub;
+USE FreelanceHub;
+```
 
-LEFT JOIN
-Se utilizó para:
-Mostrar proyectos incluso si no tienen postulaciones.
-Mostrar freelancers aunque no hayan sido asignados.
-Incluir datos opcionales sin perder registros principales.
-Subconsultas
-Se aplicaron para:
-Obtener valores agregados (ej: total de pagos por proyecto).
-Filtrar resultados basados en condiciones complejas.
-Comparaciones dentro de consultas (ej: mejores ofertas).
-Cumplimiento del porcentaje
+3. Ejecutar primero el contenido de **schema.sql**.
+4. Ejecutar después **inserts.sql**.
+5. Finalmente ejecutar **reportes.sql** para verificar los reportes solicitados.
 
-El conjunto de consultas fue diseñado asegurando que:
+### Recomendación
+Si se vuelve a ejecutar el script de inserción, conviene hacerlo sobre una base de datos vacía para evitar errores por claves duplicadas, especialmente en los registros con identificadores explícitos.
 
-Un porcentaje significativo incluye LEFT JOIN, priorizando integridad de resultados.
-Varias consultas hacen uso de subconsultas para lógica avanzada.
+## Comentario sobre el uso de LEFT JOIN y subconsultas
+En el archivo **reportes.sql** hay **8 consultas** en total. De ellas, **7** usan **LEFT JOIN** o **subconsultas**:
 
-Esto garantiza el cumplimiento del requisito académico sobre diversidad en técnicas SQL.
+- Consulta 1: usa LEFT JOIN.
+- Consulta 2: usa subconsultas.
+- Consulta 3: usa subconsultas.
+- Consulta 4: usa LEFT JOIN.
+- Consulta 5: usa LEFT JOIN.
+- Consulta 6: usa subconsulta.
+- Consulta 8: usa LEFT JOIN.
+
+Solo la consulta 7 no utiliza esas técnicas.
+
+Por tanto, el porcentaje de consultas que cumplen con ese criterio es:
+
+**7 / 8 = 87.5%**
+
+Esto demuestra un uso mayoritario de técnicas de consulta avanzadas, útiles para reportes con relaciones opcionales, agregaciones y filtrados sobre datos relacionados.
+
+## Estructura resumida del proyecto
+- **schema.sql**: definición del modelo relacional.
+- **inserts.sql**: datos de prueba y escenarios adicionales.
+- **reportes.sql**: consultas de análisis.
+- **mer.txt**: diagrama del modelo entidad-relación en PlantUML.
+
+## Observación final
+El diseño prioriza la trazabilidad del trabajo freelance, la posibilidad de manejar pagos parciales y la generación de reportes con relaciones reales entre entidades, lo que hace que el modelo sea adecuado para prácticas de bases de datos relacionales.
